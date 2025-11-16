@@ -197,45 +197,63 @@
     }
 
     /* Liste de suggestions claire */
-    .est-suggestions{
-      position:absolute;
-      left:0;
-      right:0;
-      top:100%;
-      margin-top:4px;
-      background:#f9fafb;
-      border:1px solid #d1d5db;
-      border-radius:10px;
-      box-shadow:0 8px 20px rgba(0,0,0,.08);
-      max-height:220px;
-      overflow:auto;
-      z-index:40;
-      display:none;
-    }
-    .est-suggest-item{
-      display:block;
-      width:100%;
-      text-align:left;
-      padding:9px 12px;
-      border:0;
-      background:#f9fafb;
-      font:inherit;
-      font-size:14px;
-      color:#111827;
-      cursor:pointer;
-      border-bottom:1px solid #e5e7eb;
-    }
-    .est-suggest-item:last-child{
-      border-bottom:none;
-    }
-    .est-suggest-item:hover{
-      background:#e0f2fe;
-      color:#111827;
-    }
+/* Conteneur de la liste */
+.est-suggestions{
+  position:absolute;
+  left:0;
+  right:0;
+  top:100%;
+  margin-top:4px;
+
+  background:#ffffff;                         /* fond blanc propre */
+  border:1px solid #cbd5e1;                   /* bord plus fin et neutre */
+  border-radius:12px;
+  box-shadow:0 8px 20px rgba(15,23,42,.12);   /* ombre un peu plus marquée */
+  padding:4px;                                /* petit padding interne */
+
+  max-height:220px;
+  overflow:auto;
+  z-index:40;
+  display:none;
+}
+
+/* Chaque suggestion */
+.est-suggest-item{
+  display:block;
+  width:100%;
+  text-align:left;
+
+  padding:9px 12px;
+  margin:2px 0;                               /* espace entre les lignes */
+
+  background:#f9fafb;
+  color:#111827;
+  font:inherit;
+  font-size:14px;
+  cursor:pointer;
+
+  border-radius:8px;                          /* bulles arrondies */
+  border:1px solid transparent;              /* pour éviter les sauts de hauteur */
+}
+
+/* Dernier élément, pas besoin de border spéciale maintenant */
+.est-suggest-item:last-child{
+  margin-bottom:2px;
+}
+
+/* Hover + navigation clavier */
+.est-suggest-item:hover,
+.est-suggest-item:focus-visible{
+  background:linear-gradient(90deg, var(--brand), var(--brand-2));
+  color:#ffffff;
+  border-color:rgba(15,23,42,.12);
+  outline:none;
+}
+
 
     .est-row button{
       display:inline-flex;align-items:center;gap:8px;background:#111827;color:#fff;
-      font-weight:800;border-radius:12px;border:1px solid #0b1220;padding:12px 16px;cursor:pointer;
+      font-weight:800;border-radius:12px;border:2px solid #0b1220;padding:12px 16px;cursor:pointer;
     }
     .est-row button:hover{filter:brightness(1.05)}
     .est-status{margin-top:10px;font-size:14px;color:var(--muted);min-height:1.2em}
@@ -803,6 +821,42 @@
         suggestBox.style.display = 'none';
       }
 
+
+
+
+
+
+      // Formate l'adresse pour l'affichage dans la liste
+      function formatSuggestionLabel(place){
+        const a = place.address || {};
+
+        const num   = a.house_number || '';
+        const road  = a.road || a.pedestrian || a.footway || a.street || a.residential || '';
+        const city  = a.town || a.city || a.village || a.hamlet || a.municipality || '';
+        const cp    = a.postcode || '';
+
+        let ligne1 = `${num ? num + ' ' : ''}${road}`.trim();     // "2 Cours de la Libération"
+        let ligne2 = `${city} ${cp}`.trim();                      // "Vinay 38470"
+
+        if (ligne1 && ligne2) return `${ligne1}, ${ligne2}`;
+        if (ligne1) return ligne1;
+        if (ligne2) return ligne2;
+
+        // secours : on coupe display_name avant "France"
+        const full = place.display_name || '';
+        const cut = full.split(', France')[0];
+        return cut || full;
+      }
+
+
+
+
+
+
+
+
+
+
       async function fetchSuggestions(q){
         if(!suggestBox) return;
         let query = q.trim();
@@ -831,7 +885,6 @@
             return;
           }
 
-          // On garde seulement les résultats "adresse" (pas les commerces)
           const allowedTypes = [
             'house','residential','road','street','suburb',
             'neighbourhood','hamlet','village','town','city','quarter'
@@ -841,14 +894,24 @@
             allowedTypes.includes(place.type || '')
           );
 
-          // Si rien trouvé avec le filtrage, on garde tout (pour ne pas planter)
-          if(!list.length) list = data;
+          if(!list.length) list = data; // secours si vraiment rien
+
+          //  DÉDOUBLAGE : on garde 1 entrée par libellé formaté
+          const seen = new Set();
+          list = list.filter(place => {
+            const label = formatSuggestionLabel(place);
+            if (seen.has(label)) return false;
+            seen.add(label);
+            place._shortLabel = label;  // on stocke pour la suite
+            return true;
+          });
 
           const html = list.map(place => {
-            const label = place.display_name || '';
-            const safe = label.replace(/"/g,'&quot;');
+            const label = place._shortLabel || formatSuggestionLabel(place);
+            const safe  = label.replace(/"/g,'&quot;');
             return `<button type="button" class="est-suggest-item">${safe}</button>`;
           }).join('');
+
           suggestBox.innerHTML = html;
           suggestBox.style.display = 'block';
         }catch(e){
@@ -856,6 +919,7 @@
           clearSuggestions();
         }
       }
+
 
       if(addrInput && suggestBox){
         addrInput.addEventListener('input', () => {

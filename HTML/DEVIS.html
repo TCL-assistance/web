@@ -5,25 +5,18 @@
   <title>&#8203;</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    @media print {
-  @page {
-    margin-top: 0;
-  }
-}
-@media print {
-  /* Masque la date en haut */
-  body::before {
-    content:"";
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    height:20mm;
-    background:white;
-    z-index:9999;
-  }
+    /* Logo site (bas de page, non imprimé) */
+    .site-footer-logo {
+      width: 100%;
+      text-align: center;
+      padding: 25px 0;
+      margin-top: 5px;
+    }
 
-}
+    .site-logo-img {
+      width: 60px;     /* ajuste si besoin */
+      opacity: 0.9;
+    }
 
     :root{
       --bg:#111317;
@@ -46,7 +39,8 @@
       background:radial-gradient(circle at top,#202736,#111317);
       color:var(--text);
       display:flex;
-      justify-content:center;
+      flex-direction:column;
+      align-items:center;
       min-height:100vh;
     }
 
@@ -58,12 +52,19 @@
 
     h1{
       margin:0 0 16px;
-      font-size:1.4rem;
+      font-size:1.2rem;
       text-align:center;
       text-transform:uppercase;
       letter-spacing:0.12em;
       color:var(--accent);
       text-shadow:0 0 8px rgba(63,181,255,0.6);
+      line-height:1.25em;
+    }
+
+    .h1-sub{
+      font-size:1.6rem;
+      display:block;
+      margin-top:4px;
     }
 
     .layout{
@@ -88,7 +89,6 @@
     .quote-card{
       flex:1 1 420px;
       min-width:320px;
-      /* on enlève l’effet “carte” sur l’aperçu */
       background:transparent;
       border:none;
       box-shadow:none;
@@ -168,11 +168,13 @@
       width:46px;
       height:24px;
     }
+
     .switch input{
       opacity:0;
       width:0;
       height:0;
     }
+
     .slider{
       position:absolute;
       cursor:pointer;
@@ -181,6 +183,7 @@
       border-radius:20px;
       transition:.2s;
     }
+
     .slider:before{
       position:absolute;
       content:"";
@@ -192,9 +195,11 @@
       background:white;
       transition:.2s;
     }
+
     .switch input:checked + .slider{
       background:var(--accent);
     }
+
     .switch input:checked + .slider:before{
       transform:translateX(22px);
     }
@@ -221,10 +226,12 @@
       box-shadow:0 8px 18px rgba(63,181,255,0.35);
       transition:transform 0.1s,box-shadow 0.1s,background 0.1s;
     }
+
     button:hover{
       transform:translateY(-1px);
       box-shadow:0 10px 22px rgba(63,181,255,0.45);
     }
+
     button:active{
       transform:translateY(0);
       box-shadow:0 4px 12px rgba(0,0,0,0.5);
@@ -236,6 +243,7 @@
       border:1px solid var(--accent-soft);
       box-shadow:none;
     }
+
     .btn-secondary:hover{
       background:var(--accent-soft);
       box-shadow:none;
@@ -353,45 +361,72 @@
       }
     }
 
-    /* Impression : ne garder QUE la page de devis, sans déco */
-    @media print{
-      *{
-        -webkit-print-color-adjust:exact;
-        print-color-adjust:exact;
+    /* Impression : ne garder QUE le devis */
+    @media print {
+
+      @page {
+        margin-top: 0;
+        margin-bottom: 0;
       }
-      body{
-        background:white;
+
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
-      .page{
-        max-width:none;
-        padding:0;
-        margin:0;
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: white !important;
       }
+
+      .page {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      /* On NE veut pas voir :
+         - le titre
+         - le formulaire
+         - les boutons
+         - le logo de la page web
+      */
       h1,
       .form-card,
-      .btn-row{
-        display:none !important;
+      .btn-row,
+      .site-footer-logo {
+        display: none !important;
       }
-      .quote-card{
-        flex:1 1 100%;
-        padding:0;
-        margin:0;
+
+      /* Le conteneur du devis prend toute la largeur */
+      .layout {
+        display: block;
       }
-      .quote-wrapper{
-        max-width:none;
-        margin:0;
-        box-shadow:none;
-        border:none;
-        border-radius:0;
-        /* marges de la feuille A4 */
-        padding:20mm 15mm;
+
+      .quote-card {
+        flex: 1 1 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      .quote-wrapper {
+        max-width: none;
+        margin: 0;
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        padding: 20mm 15mm;  /* marges A4 */
       }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    <h1>Générateur de devis – Equinox</h1>
+    <h1>
+      Générateur de devis<br>
+      <span class="h1-sub">Equinox</span>
+    </h1>
 
     <div class="layout">
       <!-- FORMULAIRE -->
@@ -464,24 +499,22 @@
         </div>
       </div>
 
-      <!-- APERÇU DU DEVIS (sans le texte "Aperçu du devis") -->
+      <!-- APERÇU DU DEVIS -->
       <div class="quote-card">
         <div class="quote-wrapper" id="quoteArea">
           <!-- En-tête -->
           <div class="quote-header">
-
-<div class="company-block">
-  <div class="company-name">Equinox</div>
-  <div>38800 Le Pont de Claix</div>
-  <div>Quentin.Culot38@gmail.com</div>
-  <div>Tel : 07&#8203; 58&#8203; 66&#8203; 30&#8203; 69</div>
-  <div>SIRET : 927843185&#8203;00012</div>
-</div>
-
+            <div class="company-block">
+              <div class="company-name">Equinox</div>
+              <div>38800 Le Pont de Claix</div>
+              <div>Quentin.Culot38@gmail.com</div>
+              <div>Tel : 07&#8203; 58&#8203; 66&#8203; 30&#8203; 69</div>
+              <div>SIRET : 927843185&#8203;00012</div>
+            </div>
 
             <div class="quote-meta">
               <div>
-                <strong>Devis N°:</strong>
+                <strong>Devis N° :</strong>
                 <span id="previewDevisNum">DEVIS-2025-0001</span>
               </div>
               <div>
@@ -526,13 +559,12 @@ Intervention à décrire…
             </div>
           </div>
 
-          <!-- Pied de page -->
+          <!-- Pied de page devis -->
           <div class="quote-footer">
-  <span>TVA non applicable, article 293 B du CGI</span>
-  <span>RIB : FR76&#8203; 1390&#8203; 6000&#8203; 3100&#8203; 2110&#8203; 5731&#8203; 914</span>
-  <span>BIC : AGRI&#8203;FRPP&#8203;839</span>
-</div>
-
+            <span>TVA non applicable, article 293 B du CGI</span>
+            <span>RIB : FR76&#8203; 1390&#8203; 6000&#8203; 3100&#8203; 2110&#8203; 5731&#8203; 914</span>
+            <span>BIC : AGRI&#8203;FRPP&#8203;839</span>
+          </div>
         </div>
       </div>
     </div>
@@ -558,7 +590,7 @@ Intervention à décrire…
     const dateInput        = document.getElementById("dateDevis");
     const btnToday         = document.getElementById("btnToday");
     const numSuffixInput   = document.getElementById("numSuffix");
-    const clientInput      = document.getElementElementById?.("clientNom") || document.getElementById("clientNom");
+    const clientInput      = document.getElementById("clientNom");
     const adresseInput     = document.getElementById("clientAdresse");
     const interInput       = document.getElementById("intervention");
     const montantInput     = document.getElementById("montant");
@@ -609,7 +641,7 @@ Intervention à décrire…
       suffix = suffix.slice(-4);
       suffix = suffix.padStart(4,"0");
       const fullNum = `DEVIS-${year}-${suffix}`;
-      previewDevisNum.textContent = `${fullNum}`;
+      previewDevisNum.textContent = fullNum;
 
       // Client & adresse
       const clientNom = clientInput.value.trim() || "Nom du client";
@@ -677,5 +709,9 @@ Intervention à décrire…
 
     updatePreview();
   </script>
+
+  <div class="site-footer-logo">
+    <img src="logo.png" class="site-logo-img" alt="Logo Equinox">
+  </div>
 </body>
 </html>

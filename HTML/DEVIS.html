@@ -10,32 +10,6 @@
     margin-top: 0;
   }
 }
-
-.site-footer-logo {
-  width: 100%;
-  text-align: center;
-  padding: 25px 0;
-  margin-top: 5px;
-}
-
-.site-logo-img {
-  width: 60px;     /* Ajuste si tu veux plus petit/grand */
-  opacity: 0.9;
-}
-
-/* Cacher le logo dans le PDF */
-@media print {
-  .site-footer-logo {
-    display: none !important;
-  }
-}
-
-
-
-
-
-
-
 @media print {
   /* Masque la date en haut */
   body::before {
@@ -65,18 +39,16 @@
       box-sizing:border-box;
     }
 
-body{
-  margin:0;
-  padding:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-  background:radial-gradient(circle at top,#202736,#111317);
-  color:var(--text);
-  display:flex;
-  flex-direction:column;   /* <--- empile en colonne */
-  align-items:center;      /* centre horizontalement */
-  min-height:100vh;
-}
-
+    body{
+      margin:0;
+      padding:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background:radial-gradient(circle at top,#202736,#111317);
+      color:var(--text);
+      display:flex;
+      justify-content:center;
+      min-height:100vh;
+    }
 
     .page{
       width:100%;
@@ -395,23 +367,11 @@ body{
         padding:0;
         margin:0;
       }
-      h1 {
-  margin: 0 0 16px;
-  font-size: 1.6rem;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--accent);
-  text-shadow: 0 0 8px rgba(63,181,255,0.6);
-  line-height: 1.25em;
-}
-
-.h1-sub {
-  font-size: 1.2rem;
-  display: block;
-  margin-top: 4px;
-}
-
+      h1,
+      .form-card,
+      .btn-row{
+        display:none !important;
+      }
       .quote-card{
         flex:1 1 100%;
         padding:0;
@@ -431,11 +391,7 @@ body{
 </head>
 <body>
   <div class="page">
-    <h1>
-  Générateur de devis<br>
-  <span class="h1-sub">Equinox</span>
-</h1>
-
+    <h1>Générateur de devis – Equinox</h1>
 
     <div class="layout">
       <!-- FORMULAIRE -->
@@ -721,18 +677,5 @@ Intervention à décrire…
 
     updatePreview();
   </script>
-
-
-
-
-
-
-
-
-<div class="site-footer-logo">
-    <img src="logo.png" class="site-logo-img" alt="Logo Equinox">
-  </div>
-
 </body>
 </html>
-

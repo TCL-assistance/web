@@ -249,6 +249,42 @@
       box-shadow:none;
     }
 
+    /* Toggle Devis / Facture */
+    .mode-toggle{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+    }
+
+    .mode-label{
+      font-size:0.8rem;
+      color:var(--muted);
+    }
+
+    .mode-buttons{
+      display:flex;
+      gap:6px;
+    }
+
+    .mode-btn{
+      border-radius:999px;
+      padding:5px 10px;
+      font-size:0.75rem;
+      border:1px solid var(--border);
+      background:#151923;
+      color:var(--muted);
+      cursor:pointer;
+      box-shadow:none;
+    }
+
+    .mode-btn.active{
+      background:var(--accent);
+      color:#021018;
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px var(--accent-soft);
+    }
+
     /* Devis (aperçu) – style "page blanche" */
     .quote-wrapper{
       background:white;
@@ -431,22 +467,33 @@
     <div class="layout">
       <!-- FORMULAIRE -->
       <div class="card form-card">
-        <div class="section-title">Paramètres du devis</div>
+
+        <!-- Switch devis / facture -->
+        <div class="mode-toggle">
+          <div class="mode-label">Type de document</div>
+          <div class="mode-buttons">
+            <button type="button" id="modeDevis" class="mode-btn active">Devis</button>
+            <button type="button" id="modeFacture" class="mode-btn">Facture</button>
+          </div>
+        </div>
+
+        <div class="section-title">Paramètres du devis / facture</div>
+
         <div class="form-grid">
           <!-- Date -->
           <div>
-            <label for="dateDevis">Date du devis</label>
+            <label for="dateDevis">Date</label>
             <div class="inline-fields">
               <input type="date" id="dateDevis" />
               <button type="button" class="btn-secondary" id="btnToday">Aujourd'hui</button>
             </div>
           </div>
 
-          <!-- Numéro devis -->
+          <!-- Numéro -->
           <div>
-            <label for="numSuffix">Numéro de devis</label>
+            <label for="numSuffix">Numéro</label>
             <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">
-              Format : <code>DEVIS-AAAA-XXXX</code> – tu saisis uniquement les 4 derniers chiffres.
+              Format : <code id="formatPattern">DEVIS-AAAA-XXXX</code> – tu saisis uniquement les 4 derniers chiffres.
             </div>
             <div class="inline-fields">
               <input type="text" id="numSuffix" placeholder="0017" maxlength="4" />
@@ -494,12 +541,12 @@
         </div>
 
         <div class="btn-row">
-          <button type="button" id="btnGenerate">Mettre à jour le devis</button>
+          <button type="button" id="btnGenerate">Mettre à jour</button>
           <button type="button" class="btn-secondary" id="btnPrint">Imprimer / PDF</button>
         </div>
       </div>
 
-      <!-- APERÇU DU DEVIS -->
+      <!-- APERÇU -->
       <div class="quote-card">
         <div class="quote-wrapper" id="quoteArea">
           <!-- En-tête -->
@@ -514,7 +561,7 @@
 
             <div class="quote-meta">
               <div>
-                <strong>Devis N° :</strong>
+                <strong id="labelNumero">Devis N° :</strong>
                 <span id="previewDevisNum">DEVIS-2025-0001</span>
               </div>
               <div>
@@ -559,7 +606,7 @@ Intervention à décrire…
             </div>
           </div>
 
-          <!-- Pied de page devis -->
+          <!-- Pied de page devis / facture -->
           <div class="quote-footer">
             <span>TVA non applicable, article 293 B du CGI</span>
             <span>RIB : FR76&#8203; 1390&#8203; 6000&#8203; 3100&#8203; 2110&#8203; 5731&#8203; 914</span>
@@ -571,6 +618,9 @@ Intervention à décrire…
   </div>
 
   <script>
+    // --- Mode courant : "devis" ou "facture"
+    let currentMode = "devis";
+
     // Utilitaires date
     function formatDateFRFromISO(isoStr){
       if(!isoStr) return "";
@@ -612,6 +662,11 @@ Intervention à décrire…
     const btnGenerate = document.getElementById("btnGenerate");
     const btnPrint    = document.getElementById("btnPrint");
 
+    const modeDevisBtn    = document.getElementById("modeDevis");
+    const modeFactureBtn  = document.getElementById("modeFacture");
+    const formatPattern   = document.getElementById("formatPattern");
+    const labelNumero     = document.getElementById("labelNumero");
+
     // Init : date du jour
     dateInput.value = todayISO();
     previewDate.textContent = formatDateFRFromISO(dateInput.value);
@@ -627,6 +682,28 @@ Intervention à décrire…
       discountBlock.style.display = hasDiscountInput.checked ? "block" : "none";
     });
 
+    // Changement de mode devis / facture
+    function setMode(mode){
+      currentMode = mode;
+
+      if(mode === "facture"){
+        modeDevisBtn.classList.remove("active");
+        modeFactureBtn.classList.add("active");
+        formatPattern.textContent = "FACTURE-AAAA-XXXX";
+        labelNumero.textContent = "Facture N° :";
+      } else {
+        modeDevisBtn.classList.add("active");
+        modeFactureBtn.classList.remove("active");
+        formatPattern.textContent = "DEVIS-AAAA-XXXX";
+        labelNumero.textContent = "Devis N° :";
+      }
+
+      updatePreview();
+    }
+
+    modeDevisBtn.addEventListener("click", () => setMode("devis"));
+    modeFactureBtn.addEventListener("click", () => setMode("facture"));
+
     // Fonction principale de mise à jour de l’aperçu
     function updatePreview(){
       const now = new Date();
@@ -636,11 +713,14 @@ Intervention à décrire…
       const dateISO = dateInput.value || todayISO();
       previewDate.textContent = formatDateFRFromISO(dateISO);
 
-      // Numéro de devis : DEVIS-YYYY-XXXX (XXXX = 4 derniers chiffres saisis)
+      // Préfixe selon le mode
+      const prefix = currentMode === "facture" ? "FACTURE" : "DEVIS";
+
+      // Numéro : PREFIX-YYYY-XXXX
       let suffix = (numSuffixInput.value || "1").replace(/\D/g,"");
       suffix = suffix.slice(-4);
       suffix = suffix.padStart(4,"0");
-      const fullNum = `DEVIS-${year}-${suffix}`;
+      const fullNum = `${prefix}-${year}-${suffix}`;
       previewDevisNum.textContent = fullNum;
 
       // Client & adresse
@@ -707,6 +787,7 @@ Intervention à décrire…
       window.print();
     });
 
+    // Premier rendu
     updatePreview();
   </script>
 

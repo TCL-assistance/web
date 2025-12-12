@@ -369,6 +369,13 @@
       font-size:0.95rem;
     }
 
+    /* (Ajout) ligne acompte si > 1000€ (devis uniquement) */
+    .notice-line{
+      margin-top:10px;
+      font-size:0.82rem;
+      color:#333;
+    }
+
     .quote-footer{
       margin-top:20px;
       border-top:1px solid #ddd;
@@ -568,6 +575,12 @@
                 <strong>Date :</strong>
                 <span id="previewDate">01/01/2025</span>
               </div>
+
+              <!-- (Ajout) Validité 72h : affiché uniquement en mode devis -->
+              <div id="validityRow" style="display:none;">
+                <strong>Validité :</strong>
+                <span id="previewValidity">01/01/2025</span>
+              </div>
             </div>
           </div>
 
@@ -604,11 +617,20 @@ Intervention à décrire…
               <span>Total à payer :</span>
               <span id="previewTotal">0,00 €</span>
             </div>
+
+            <!-- (Ajout) Acompte si > 1000€ : devis uniquement -->
+            <div id="depositNotice" class="notice-line" style="display:none;">
+              Tout devis accepté implique le versement d’un acompte de 30&nbsp;%.
+            </div>
           </div>
 
           <!-- Pied de page devis / facture -->
           <div class="quote-footer">
             <span>TVA non applicable, article 293 B du CGI</span>
+
+            <!-- (Ajout) Titulaire -->
+            <span>Titulaire : Quentin CULOT</span>
+
             <span>RIB : FR76&#8203; 1390&#8203; 6000&#8203; 3100&#8203; 2110&#8203; 5731&#8203; 914</span>
             <span>BIC : AGRI&#8203;FRPP&#8203;839</span>
           </div>
@@ -634,6 +656,20 @@ Intervention à décrire…
       const m = String(d.getMonth()+1).padStart(2,"0");
       const day = String(d.getDate()).padStart(2,"0");
       return y + "-" + m + "-" + day;
+    }
+
+    // (Ajout) convertir YYYY-MM-DD -> Date local (sans décalage UTC)
+    function dateFromISO(isoStr){
+      const [y,m,d] = isoStr.split("-").map(Number);
+      return new Date(y, (m-1), d, 12, 0, 0); // 12h pour éviter les soucis DST
+    }
+
+    // (Ajout) Date FR depuis objet Date
+    function formatDateFRFromDate(dt){
+      const dd = String(dt.getDate()).padStart(2,"0");
+      const mm = String(dt.getMonth()+1).padStart(2,"0");
+      const yy = dt.getFullYear();
+      return `${dd}/${mm}/${yy}`;
     }
 
     // Références DOM
@@ -666,6 +702,11 @@ Intervention à décrire…
     const modeFactureBtn  = document.getElementById("modeFacture");
     const formatPattern   = document.getElementById("formatPattern");
     const labelNumero     = document.getElementById("labelNumero");
+
+    // (Ajout) Validité + acompte
+    const validityRow     = document.getElementById("validityRow");
+    const previewValidity = document.getElementById("previewValidity");
+    const depositNotice   = document.getElementById("depositNotice");
 
     // Init : date du jour
     dateInput.value = todayISO();
@@ -743,7 +784,7 @@ Intervention à décrire…
       let total = montant;
 
       if(hasDiscountInput.checked){
-        discountPercent = parseFloat(String(discountInput.value).replace(",","."));
+        discountPercent = parseFloat(String(discountInput.value).replace(",",".")); 
         if(isNaN(discountPercent) || discountPercent <= 0){
           discountPercent = 0;
         }
@@ -769,6 +810,23 @@ Intervention à décrire…
       }
 
       previewTotal.textContent = fmt(total);
+
+      // (Ajout) Validité 72h : seulement en mode devis
+      if(currentMode === "devis"){
+        validityRow.style.display = "block";
+        const base = dateFromISO(dateISO);
+        base.setDate(base.getDate() + 3); // 72h ~ +3 jours
+        previewValidity.textContent = formatDateFRFromDate(base);
+      }else{
+        validityRow.style.display = "none";
+      }
+
+      // (Ajout) Acompte si > 1000€ : seulement devis + total > 1000
+      if(currentMode === "devis" && total > 1000){
+        depositNotice.style.display = "block";
+      }else{
+        depositNotice.style.display = "none";
+      }
     }
 
     btnGenerate.addEventListener("click", updatePreview);

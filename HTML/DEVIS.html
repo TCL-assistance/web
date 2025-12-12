@@ -28,9 +28,7 @@
       --border:#2a2f3a;
     }
 
-    *{
-      box-sizing:border-box;
-    }
+    *{ box-sizing:border-box; }
 
     body{
       margin:0;
@@ -152,57 +150,7 @@
       gap:8px;
     }
 
-    .inline-fields > div{
-      flex:1;
-    }
-
-    .switch-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-top:4px;
-    }
-
-    .switch{
-      position:relative;
-      width:46px;
-      height:24px;
-    }
-
-    .switch input{
-      opacity:0;
-      width:0;
-      height:0;
-    }
-
-    .slider{
-      position:absolute;
-      cursor:pointer;
-      inset:0;
-      background:#252a35;
-      border-radius:20px;
-      transition:.2s;
-    }
-
-    .slider:before{
-      position:absolute;
-      content:"";
-      height:18px;
-      width:18px;
-      left:3px;
-      top:3px;
-      border-radius:50%;
-      background:white;
-      transition:.2s;
-    }
-
-    .switch input:checked + .slider{
-      background:var(--accent);
-    }
-
-    .switch input:checked + .slider:before{
-      transform:translateX(22px);
-    }
+    .inline-fields > div{ flex:1; }
 
     .btn-row{
       display:flex;
@@ -326,18 +274,14 @@
       min-width:80px;
     }
 
-    .quote-section{
-      margin-bottom:10px;
-    }
+    .quote-section{ margin-bottom:10px; }
 
     .quote-section-title{
       font-weight:600;
       margin-bottom:3px;
     }
 
-    .quote-address{
-      white-space:pre-line;
-    }
+    .quote-address{ white-space:pre-line; }
 
     .quote-desc{
       white-space:pre-line;
@@ -369,7 +313,7 @@
       font-size:0.95rem;
     }
 
-    /* (Ajout) ligne acompte si > 1000€ (devis uniquement) */
+    /* ligne acompte si > 1000€ (devis uniquement) */
     .notice-line{
       margin-top:10px;
       font-size:0.82rem;
@@ -387,79 +331,41 @@
       gap:3px;
     }
 
-    .quote-footer span{
-      display:block;
-    }
+    .quote-footer span{ display:block; }
 
     @media (max-width:700px){
       .quote-header{
         flex-direction:column;
         align-items:flex-start;
       }
-      .quote-meta{
-        text-align:left;
-      }
-      .quote-wrapper{
-        padding:18px 14px 14px;
-      }
+      .quote-meta{ text-align:left; }
+      .quote-wrapper{ padding:18px 14px 14px; }
     }
 
     /* Impression : ne garder QUE le devis */
     @media print {
+      @page { margin-top: 0; margin-bottom: 0; }
+      *{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body{ margin: 0; padding: 0; background: white !important; }
+      .page{ max-width: none; padding: 0; margin: 0; }
 
-      @page {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
+      h1, .form-card, .btn-row, .site-footer-logo { display: none !important; }
 
-      * {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
+      .layout{ display: block; }
 
-      body {
-        margin: 0;
-        padding: 0;
-        background: white !important;
-      }
-
-      .page {
-        max-width: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      /* On NE veut pas voir :
-         - le titre
-         - le formulaire
-         - les boutons
-         - le logo de la page web
-      */
-      h1,
-      .form-card,
-      .btn-row,
-      .site-footer-logo {
-        display: none !important;
-      }
-
-      /* Le conteneur du devis prend toute la largeur */
-      .layout {
-        display: block;
-      }
-
-      .quote-card {
+      .quote-card{
         flex: 1 1 100%;
         padding: 0;
         margin: 0;
       }
 
-      .quote-wrapper {
+      .quote-wrapper{
         max-width: none;
         margin: 0;
         box-shadow: none;
         border: none;
         border-radius: 0;
-        padding: 20mm 15mm;  /* marges A4 */
+        padding: 20mm 15mm;
       }
     }
   </style>
@@ -496,6 +402,12 @@
             </div>
           </div>
 
+          <!-- (AJOUT) Date intervention (FACTURE UNIQUEMENT) -->
+          <div id="interventionDateBlock" style="display:none;">
+            <label for="dateIntervention">Date de l’intervention</label>
+            <input type="date" id="dateIntervention" />
+          </div>
+
           <!-- Numéro -->
           <div>
             <label for="numSuffix">Numéro</label>
@@ -503,25 +415,25 @@
               Format : <code id="formatPattern">DEVIS-AAAA-XXXX</code> – tu saisis uniquement les 4 derniers chiffres.
             </div>
             <div class="inline-fields">
-              <input type="text" id="numSuffix" placeholder="0017" maxlength="4" />
+              <input type="text" id="numSuffix" placeholder="" maxlength="4" />
             </div>
           </div>
 
           <!-- Client -->
           <div>
             <label for="clientNom">Nom du client</label>
-            <input type="text" id="clientNom" placeholder="Nom du client" />
+            <input type="text" id="clientNom" placeholder="" />
           </div>
 
           <div>
             <label for="clientAdresse">Adresse du client</label>
-            <textarea id="clientAdresse" placeholder="Adresse complète"></textarea>
+            <textarea id="clientAdresse" placeholder=""></textarea>
           </div>
 
           <!-- Description -->
           <div>
             <label for="intervention">Description de l'intervention</label>
-            <textarea id="intervention" placeholder="Détaille l'intervention ici"></textarea>
+            <textarea id="intervention" placeholder=""></textarea>
           </div>
 
           <!-- Montant -->
@@ -530,19 +442,18 @@
             <input type="number" id="montant" placeholder="0.00" step="0.01" min="0" />
           </div>
 
-          <!-- Réduction -->
+          <!-- (MODIF) Réduction : liste déroulante -->
           <div>
-            <label>Réduction</label>
-            <div class="switch-row">
-              <span style="font-size:0.85rem;color:var(--muted);">Appliquer une réduction ?</span>
-              <label class="switch">
-                <input type="checkbox" id="hasDiscount" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div id="discountBlock" style="margin-top:8px;display:none;">
-              <label for="discountPercent">Pourcentage de réduction (%)</label>
-              <input type="number" id="discountPercent" placeholder="10" step="0.1" min="0" max="100" />
+            <label for="discountSelect">Réduction</label>
+            <select id="discountSelect">
+              <option value="0">0 %</option>
+              <option value="5">5 %</option>
+              <option value="10">10 %</option>
+              <option value="15">15 %</option>
+              <option value="20">20 %</option>
+            </select>
+            <div style="margin-top:6px;font-size:0.8rem;color:var(--muted);">
+              0 % désactive la réduction.
             </div>
           </div>
         </div>
@@ -576,7 +487,13 @@
                 <span id="previewDate">01/01/2025</span>
               </div>
 
-              <!-- (Ajout) Validité 72h : affiché uniquement en mode devis -->
+              <!-- (AJOUT) Date intervention (FACTURE UNIQUEMENT) -->
+              <div id="interventionDateRow" style="display:none;">
+                <strong>Date intervention :</strong>
+                <span id="previewInterventionDate">01/01/2025</span>
+              </div>
+
+              <!-- Validité 72h : devis uniquement -->
               <div id="validityRow" style="display:none;">
                 <strong>Validité :</strong>
                 <span id="previewValidity">01/01/2025</span>
@@ -618,7 +535,7 @@ Intervention à décrire…
               <span id="previewTotal">0,00 €</span>
             </div>
 
-            <!-- (Ajout) Acompte si > 1000€ : devis uniquement -->
+            <!-- Acompte si > 1000€ : devis uniquement -->
             <div id="depositNotice" class="notice-line" style="display:none;">
               Tout devis accepté implique le versement d’un acompte de 30&nbsp;%.
             </div>
@@ -627,10 +544,7 @@ Intervention à décrire…
           <!-- Pied de page devis / facture -->
           <div class="quote-footer">
             <span>TVA non applicable, article 293 B du CGI</span>
-
-            <!-- (Ajout) Titulaire -->
             <span>Titulaire : Quentin CULOT</span>
-
             <span>RIB : FR76&#8203; 1390&#8203; 6000&#8203; 3100&#8203; 2110&#8203; 5731&#8203; 914</span>
             <span>BIC : AGRI&#8203;FRPP&#8203;839</span>
           </div>
@@ -643,7 +557,6 @@ Intervention à décrire…
     // --- Mode courant : "devis" ou "facture"
     let currentMode = "devis";
 
-    // Utilitaires date
     function formatDateFRFromISO(isoStr){
       if(!isoStr) return "";
       const [y,m,d] = isoStr.split("-");
@@ -658,13 +571,11 @@ Intervention à décrire…
       return y + "-" + m + "-" + day;
     }
 
-    // (Ajout) convertir YYYY-MM-DD -> Date local (sans décalage UTC)
     function dateFromISO(isoStr){
       const [y,m,d] = isoStr.split("-").map(Number);
-      return new Date(y, (m-1), d, 12, 0, 0); // 12h pour éviter les soucis DST
+      return new Date(y, (m-1), d, 12, 0, 0);
     }
 
-    // (Ajout) Date FR depuis objet Date
     function formatDateFRFromDate(dt){
       const dd = String(dt.getDate()).padStart(2,"0");
       const mm = String(dt.getMonth()+1).padStart(2,"0");
@@ -680,9 +591,13 @@ Intervention à décrire…
     const adresseInput     = document.getElementById("clientAdresse");
     const interInput       = document.getElementById("intervention");
     const montantInput     = document.getElementById("montant");
-    const hasDiscountInput = document.getElementById("hasDiscount");
-    const discountBlock    = document.getElementById("discountBlock");
-    const discountInput    = document.getElementById("discountPercent");
+
+    // (MODIF) select réduction
+    const discountSelect   = document.getElementById("discountSelect");
+
+    // (AJOUT) date intervention facture
+    const interventionDateBlock = document.getElementById("interventionDateBlock");
+    const interventionDateInput = document.getElementById("dateIntervention");
 
     const previewDate          = document.getElementById("previewDate");
     const previewDevisNum      = document.getElementById("previewDevisNum");
@@ -703,27 +618,24 @@ Intervention à décrire…
     const formatPattern   = document.getElementById("formatPattern");
     const labelNumero     = document.getElementById("labelNumero");
 
-    // (Ajout) Validité + acompte
     const validityRow     = document.getElementById("validityRow");
     const previewValidity = document.getElementById("previewValidity");
     const depositNotice   = document.getElementById("depositNotice");
 
-    // Init : date du jour
+    // (AJOUT) aperçu date intervention facture
+    const interventionDateRow = document.getElementById("interventionDateRow");
+    const previewInterventionDate = document.getElementById("previewInterventionDate");
+
+    // Init date du jour
     dateInput.value = todayISO();
     previewDate.textContent = formatDateFRFromISO(dateInput.value);
 
-    // Bouton "Aujourd'hui"
     btnToday.addEventListener("click", () => {
       dateInput.value = todayISO();
       previewDate.textContent = formatDateFRFromISO(dateInput.value);
+      updatePreview();
     });
 
-    // Afficher / cacher le bloc de remise
-    hasDiscountInput.addEventListener("change", () => {
-      discountBlock.style.display = hasDiscountInput.checked ? "block" : "none";
-    });
-
-    // Changement de mode devis / facture
     function setMode(mode){
       currentMode = mode;
 
@@ -732,11 +644,18 @@ Intervention à décrire…
         modeFactureBtn.classList.add("active");
         formatPattern.textContent = "FACTURE-AAAA-XXXX";
         labelNumero.textContent = "Facture N° :";
+
+        // Afficher le champ date intervention (form) + ligne aperçu
+        interventionDateBlock.style.display = "block";
+        interventionDateRow.style.display   = "block";
       } else {
         modeDevisBtn.classList.add("active");
         modeFactureBtn.classList.remove("active");
         formatPattern.textContent = "DEVIS-AAAA-XXXX";
         labelNumero.textContent = "Devis N° :";
+
+        interventionDateBlock.style.display = "none";
+        interventionDateRow.style.display   = "none";
       }
 
       updatePreview();
@@ -745,53 +664,40 @@ Intervention à décrire…
     modeDevisBtn.addEventListener("click", () => setMode("devis"));
     modeFactureBtn.addEventListener("click", () => setMode("facture"));
 
-    // Fonction principale de mise à jour de l’aperçu
     function updatePreview(){
       const now = new Date();
       const year = now.getFullYear();
 
-      // Date
       const dateISO = dateInput.value || todayISO();
       previewDate.textContent = formatDateFRFromISO(dateISO);
 
-      // Préfixe selon le mode
       const prefix = currentMode === "facture" ? "FACTURE" : "DEVIS";
 
-      // Numéro : PREFIX-YYYY-XXXX
       let suffix = (numSuffixInput.value || "1").replace(/\D/g,"");
       suffix = suffix.slice(-4);
       suffix = suffix.padStart(4,"0");
-      const fullNum = `${prefix}-${year}-${suffix}`;
-      previewDevisNum.textContent = fullNum;
+      previewDevisNum.textContent = `${prefix}-${year}-${suffix}`;
 
-      // Client & adresse
       const clientNom = clientInput.value.trim() || "Nom du client";
       previewClient.textContent = clientNom;
 
       const adresse = adresseInput.value.trim() || "Adresse du client";
       previewAdresse.textContent = adresse;
 
-      // Description
       const inter = interInput.value.trim() || "Intervention à décrire…";
       previewIntervention.textContent = inter;
 
-      // Montant + réduction
       let montant = parseFloat(String(montantInput.value).replace(",","."));
       if(isNaN(montant)) montant = 0;
 
-      let discountPercent = 0;
+      // (MODIF) réduction depuis liste
+      const discountPercent = parseFloat(discountSelect.value || "0") || 0;
       let discountAmount = 0;
       let total = montant;
 
-      if(hasDiscountInput.checked){
-        discountPercent = parseFloat(String(discountInput.value).replace(",",".")); 
-        if(isNaN(discountPercent) || discountPercent <= 0){
-          discountPercent = 0;
-        }
-        if(discountPercent > 0){
-          discountAmount = montant * (discountPercent/100);
-          total = montant - discountAmount;
-        }
+      if(discountPercent > 0){
+        discountAmount = montant * (discountPercent/100);
+        total = montant - discountAmount;
       }
 
       const fmt = (v) => v.toLocaleString("fr-FR", {
@@ -811,21 +717,27 @@ Intervention à décrire…
 
       previewTotal.textContent = fmt(total);
 
-      // (Ajout) Validité 72h : seulement en mode devis
+      // Validité 72h : seulement en mode devis
       if(currentMode === "devis"){
         validityRow.style.display = "block";
         const base = dateFromISO(dateISO);
-        base.setDate(base.getDate() + 3); // 72h ~ +3 jours
+        base.setDate(base.getDate() + 3);
         previewValidity.textContent = formatDateFRFromDate(base);
       }else{
         validityRow.style.display = "none";
       }
 
-      // (Ajout) Acompte si > 1000€ : seulement devis + total > 1000
+      // Acompte si > 1000€ : seulement devis + total > 1000
       if(currentMode === "devis" && total > 1000){
         depositNotice.style.display = "block";
       }else{
         depositNotice.style.display = "none";
+      }
+
+      // (AJOUT) Date intervention : seulement facture
+      if(currentMode === "facture"){
+        const intISO = interventionDateInput.value || "";
+        previewInterventionDate.textContent = intISO ? formatDateFRFromISO(intISO) : "—";
       }
     }
 
@@ -837,8 +749,8 @@ Intervention à décrire…
     adresseInput.addEventListener("input", updatePreview);
     interInput.addEventListener("input", updatePreview);
     montantInput.addEventListener("input", updatePreview);
-    discountInput.addEventListener("input", updatePreview);
-    hasDiscountInput.addEventListener("change", updatePreview);
+    discountSelect.addEventListener("change", updatePreview);
+    interventionDateInput.addEventListener("change", updatePreview);
 
     btnPrint.addEventListener("click", () => {
       updatePreview();
@@ -846,6 +758,7 @@ Intervention à décrire…
     });
 
     // Premier rendu
+    setMode("devis");
     updatePreview();
   </script>
 

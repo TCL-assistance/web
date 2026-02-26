@@ -34,7 +34,10 @@
       margin:0;
       padding:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background:radial-gradient(circle at top,#202736,#111317);
+
+      /*background:radial-gradient(circle at top,#202736,#111317);*/
+      background:radial-gradient(circle at top,#2a3e6b,#111317);
+
       color:var(--text);
       display:flex;
       flex-direction:column;
@@ -264,6 +267,12 @@
       text-transform:uppercase;
     }
 
+    .company-legal{
+      font-weight:600;
+      font-size:0.82rem;
+      margin-top:2px;
+    }
+
     .quote-meta{
       text-align:right;
       font-size:0.85rem;
@@ -369,12 +378,10 @@
       }
     }
 
-/* Date intervention plus compacte (mobile friendly) */
-#interventionDateBlock input[type="date"]{
-  max-width: 220px;
-}
-
-
+    /* Date intervention plus compacte (mobile friendly) */
+    #interventionDateBlock input[type="date"]{
+      max-width: 220px;
+    }
   </style>
 </head>
 <body>
@@ -409,7 +416,7 @@
             </div>
           </div>
 
-          <!-- (AJOUT) Date intervention (FACTURE UNIQUEMENT) -->
+          <!-- Date intervention (FACTURE UNIQUEMENT) -->
           <div id="interventionDateBlock" style="display:none;">
             <label for="dateIntervention">Date de l’intervention</label>
             <input type="date" id="dateIntervention" />
@@ -437,6 +444,15 @@
             <textarea id="clientAdresse" placeholder=""></textarea>
           </div>
 
+          <!-- (AJOUT) Type de client -->
+          <div>
+            <label for="clientType">Type de client</label>
+            <select id="clientType">
+              <option value="pro" selected>Professionnel (B2B)</option>
+              <option value="particulier">Particulier (B2C)</option>
+            </select>
+          </div>
+
           <!-- Description -->
           <div>
             <label for="intervention">Description de l'intervention</label>
@@ -449,7 +465,7 @@
             <input type="number" id="montant" placeholder="0.00" step="0.01" min="0" />
           </div>
 
-          <!-- (MODIF) Réduction : liste déroulante -->
+          <!-- Réduction : liste déroulante -->
           <div>
             <label for="discountSelect">Réduction</label>
             <select id="discountSelect">
@@ -478,6 +494,10 @@
           <div class="quote-header">
             <div class="company-block">
               <div class="company-name">Equinox</div>
+              <!-- (AJOUT) ligne légale (sans inventer d'infos) -->
+              <div class="company-legal">CULOT Quentin EI</div>
+
+              <!-- (CONSERVÉ) infos de ton code 2 -->
               <div>38800 Le Pont de Claix</div>
               <div>Quentin.Culot38@gmail.com</div>
               <div>Tel : 07&#8203; 58&#8203; 66&#8203; 30&#8203; 69</div>
@@ -494,7 +514,7 @@
                 <span id="previewDate">01/01/2025</span>
               </div>
 
-              <!-- (AJOUT) Date intervention (FACTURE UNIQUEMENT) -->
+              <!-- Date intervention (FACTURE UNIQUEMENT) -->
               <div id="interventionDateRow" style="display:none;">
                 <strong>Date intervention :</strong>
                 <span id="previewInterventionDate">01/01/2025</span>
@@ -551,9 +571,17 @@ Intervention à décrire…
           <!-- Pied de page devis / facture -->
           <div class="quote-footer">
             <span>TVA non applicable, article 293 B du CGI</span>
+
+            <!-- (CONSERVÉ) tes infos -->
             <span>Titulaire : Quentin CULOT</span>
             <span>RIB : FR76&#8203; 1390&#8203; 6000&#8203; 3100&#8203; 2110&#8203; 5731&#8203; 914</span>
             <span>BIC : AGRI&#8203;FRPP&#8203;839</span>
+
+            <!-- (AJOUT) Conditions DEVIS -->
+            <span id="termsDevis" style="margin-top:6px; display:none;"></span>
+
+            <!-- (AJOUT) Conditions FACTURE -->
+            <span id="termsFacture" style="margin-top:6px; display:none;"></span>
           </div>
         </div>
       </div>
@@ -596,13 +624,12 @@ Intervention à décrire…
     const numSuffixInput   = document.getElementById("numSuffix");
     const clientInput      = document.getElementById("clientNom");
     const adresseInput     = document.getElementById("clientAdresse");
+    const clientTypeSelect = document.getElementById("clientType");
     const interInput       = document.getElementById("intervention");
     const montantInput     = document.getElementById("montant");
-
-    // (MODIF) select réduction
     const discountSelect   = document.getElementById("discountSelect");
 
-    // (AJOUT) date intervention facture
+    // Date intervention facture
     const interventionDateBlock = document.getElementById("interventionDateBlock");
     const interventionDateInput = document.getElementById("dateIntervention");
 
@@ -629,9 +656,13 @@ Intervention à décrire…
     const previewValidity = document.getElementById("previewValidity");
     const depositNotice   = document.getElementById("depositNotice");
 
-    // (AJOUT) aperçu date intervention facture
+    // Aperçu date intervention facture
     const interventionDateRow = document.getElementById("interventionDateRow");
     const previewInterventionDate = document.getElementById("previewInterventionDate");
+
+    // Conditions
+    const termsDevis   = document.getElementById("termsDevis");
+    const termsFacture = document.getElementById("termsFacture");
 
     // Init date du jour
     dateInput.value = todayISO();
@@ -655,6 +686,10 @@ Intervention à décrire…
         // Afficher le champ date intervention (form) + ligne aperçu
         interventionDateBlock.style.display = "block";
         interventionDateRow.style.display   = "block";
+
+        // Conditions
+        termsDevis.style.display = "none";
+        termsFacture.style.display = "block";
       } else {
         modeDevisBtn.classList.add("active");
         modeFactureBtn.classList.remove("active");
@@ -663,6 +698,10 @@ Intervention à décrire…
 
         interventionDateBlock.style.display = "none";
         interventionDateRow.style.display   = "none";
+
+        // Conditions
+        termsFacture.style.display = "none";
+        termsDevis.style.display = "block";
       }
 
       updatePreview();
@@ -672,11 +711,13 @@ Intervention à décrire…
     modeFactureBtn.addEventListener("click", () => setMode("facture"));
 
     function updatePreview(){
-      const now = new Date();
-      const year = now.getFullYear();
-
       const dateISO = dateInput.value || todayISO();
-      previewDate.textContent = formatDateFRFromISO(dateISO);
+      const dateFR  = formatDateFRFromISO(dateISO);
+
+      // année = celle de la date choisie (pas celle du PC)
+      const year = (dateISO.split("-")[0]) || new Date().getFullYear();
+
+      previewDate.textContent = dateFR;
 
       const prefix = currentMode === "facture" ? "FACTURE" : "DEVIS";
 
@@ -697,7 +738,6 @@ Intervention à décrire…
       let montant = parseFloat(String(montantInput.value).replace(",","."));
       if(isNaN(montant)) montant = 0;
 
-      // (MODIF) réduction depuis liste
       const discountPercent = parseFloat(discountSelect.value || "0") || 0;
       let discountAmount = 0;
       let total = montant;
@@ -741,11 +781,46 @@ Intervention à décrire…
         depositNotice.style.display = "none";
       }
 
-      // (AJOUT) Date intervention : seulement facture
+      // Date intervention : seulement facture
       if(currentMode === "facture"){
         const intISO = interventionDateInput.value || "";
         previewInterventionDate.textContent = intISO ? formatDateFRFromISO(intISO) : "—";
       }
+
+      // ---- Conditions : 40€ uniquement pour PRO (B2B)
+      const isPro = (clientTypeSelect?.value || "pro") === "pro";
+
+      if(isPro){
+        termsDevis.innerHTML = `
+          Conditions de règlement :
+          Le règlement devra intervenir sous 14 jours à compter de la date de facturation. Passé ce délai,
+          une pénalité de retard sera appliquée conformément à l’article L441-10 du Code de commerce, au taux d’intérêt légal en vigueur.
+          Une indemnité forfaitaire pour frais de recouvrement de 40 € sera également due (décret n°2012-1115 du 2 octobre 2012).
+        `;
+
+        termsFacture.innerHTML = `
+          Mr CULOT Quentin vous a envoyé cette facture le <span id="invoiceSentDate">—</span>.
+          Celle-ci doit être réglée sous 14 jours à compter de cette date. Passé ce délai, une pénalité de retard sera appliquée conformément à l’article
+          L441-10 du Code de commerce, au taux d’intérêt légal en vigueur.
+          Une indemnité forfaitaire pour frais de recouvrement de 40 € sera également due (décret n°2012-1115 du 2 octobre 2012).
+        `;
+      }else{
+        termsDevis.innerHTML = `
+          Conditions de règlement :
+          Le règlement devra intervenir sous 14 jours à compter de la date de facturation. Passé ce délai,
+          une pénalité de retard sera appliquée conformément à l’article L441-10 du Code de commerce, au taux d’intérêt légal en vigueur.
+        `;
+
+        termsFacture.innerHTML = `
+          Mr CULOT Quentin vous a envoyé cette facture le <span id="invoiceSentDate">—</span>.
+          Celle-ci doit être réglée sous 14 jours à compter de cette date. Passé ce délai, une pénalité de retard sera appliquée conformément à l’article
+          L441-10 du Code de commerce, au taux d’intérêt légal en vigueur.
+        `;
+      }
+
+      // remettre la date (car on réécrit le HTML au-dessus)
+      const sent = document.getElementById("invoiceSentDate");
+      if(sent) sent.textContent = dateFR || "—";
     }
 
     btnGenerate.addEventListener("click", updatePreview);
@@ -754,6 +829,7 @@ Intervention à décrire…
     numSuffixInput.addEventListener("input", updatePreview);
     clientInput.addEventListener("input", updatePreview);
     adresseInput.addEventListener("input", updatePreview);
+    clientTypeSelect.addEventListener("change", updatePreview);
     interInput.addEventListener("input", updatePreview);
     montantInput.addEventListener("input", updatePreview);
     discountSelect.addEventListener("change", updatePreview);
